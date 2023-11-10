@@ -43,7 +43,7 @@ classifiers = [
 dev = ["build", "twine"]
 
 [tool.hatch.build]
-artifacts = ["/backend/gradio_blurhashimage/templates", "*.pyi"]
+artifacts = ["/backend/gradio_blurhashimage/templates", "*.pyi", "backend/gradio_blurhashimage/templates"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["/backend/gradio_blurhashimage"]
