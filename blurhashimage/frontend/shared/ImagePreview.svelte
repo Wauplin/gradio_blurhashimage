@@ -5,16 +5,16 @@
 	import { BlockLabel, Empty, IconButton, ShareButton } from "@gradio/atoms";
 	import { Download } from "@gradio/icons";
 	import { get_coordinates_of_clicked_image } from "./utils";
+	import { normalise_blurhash_file, BlurhashFileData } from "./data";
+	import { BlurhashImage } from 'svelte-blurhash';
 
 	import { Image } from "@gradio/icons";
-	import { type FileData, normalise_file } from "@gradio/client";
 	import type { I18nFormatter } from "@gradio/utils";
 
-	export let value: null | FileData;
+	export let value: null | BlurhashFileData;
 	export let label: string | undefined = undefined;
 	export let show_label: boolean;
 	export let show_download_button = true;
-	export let selectable = false;
 	export let show_share_button = false;
 	export let root: string;
 	export let i18n: I18nFormatter;
@@ -24,7 +24,7 @@
 		select: SelectData;
 	}>();
 
-	$: value = normalise_file(value, root, null);
+	$: value = normalise_blurhash_file(value, root, null);
 
 	const handle_click = (evt: MouseEvent): void => {
 		let coordinates = get_coordinates_of_clicked_image(evt);
@@ -35,13 +35,13 @@
 </script>
 
 <BlockLabel {show_label} Icon={Image} label={label || i18n("image.image")} />
-{#if value === null || !value.url}
+{#if value === null || value.image === null || !value.image.url}
 	<Empty unpadded_box={true} size="large"><Image /></Empty>
 {:else}
 	<div class="icon-buttons">
 		{#if show_download_button}
 			<a
-				href={value.url}
+				href={value.image.url}
 				target={window.__is_colab__ ? "_blank" : null}
 				download={"image"}
 			>
@@ -61,14 +61,27 @@
 				{value}
 			/>
 		{/if}
+		
 	</div>
-	<button on:click={handle_click}>
-		<img src={value.url} alt="" class:selectable loading="lazy" />
+	<button on:click={handle_click} class="selectable">
+		<div class="image-wrapper">
+			<BlurhashImage
+				src={value.image.url}
+				hash={value.blurhash}
+				width={value.width}
+				height={value.height}
+				/>
+		</div>
 	</button>
+
 {/if}
 
 <style>
-	img,
+	.image-wrapper {
+		max-width: 100%;
+		object-fit: cover;
+	}
+
 	button {
 		width: var(--size-full);
 		height: var(--size-full);
